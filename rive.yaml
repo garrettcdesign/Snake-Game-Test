@@ -1,5 +1,5 @@
 name: snake-game
-main: Game
+main: "Game"
 logs:
   file: build/rive.log
   problems: build/problems.log
