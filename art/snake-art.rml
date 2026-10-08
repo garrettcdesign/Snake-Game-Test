@@ -1,0 +1,206 @@
+<Rive version="1" kind="fragment">
+    <!--
+        SWAPPABLE ART
+        =============
+        The game script draws these three artboards; it never draws any snake
+        or food art itself. Replace what is inside an artboard and the game
+        picks it up on the next build.
+
+        The contract every piece of art follows:
+          * the artboard is 100 x 100, and the art is centred on (50, 50)
+          * the game scales it to one grid cell, so 100 units = one cell
+          * Head faces RIGHT (+x); the game rotates it to the travel direction
+          * each artboard's own state machine plays while the game runs, so
+            idle loops (blinking, bobbing) just work
+
+        To use an image instead of vector art, see README.md, "Swapping art".
+        In RML the FIRST sibling draws on TOP.
+    -->
+
+    <!-- ===================== HEAD ===================== -->
+    <Artboard isComponent="true" defaultStateMachineId="1:90" clip="false" width="100" height="100"
+              styleId="1:2" x="0" y="0" name="Head" id="1:1">
+        <LayoutComponentStyle name="Head Style" id="1:2"/>
+
+        <Node x="50" y="50" name="Face" id="1:10">
+            <!-- eyes sit toward the front (right) of the head -->
+            <Node x="16" y="-19" name="Eye Top" id="1:11">
+                <Shape x="3" name="Pupil">
+                    <Ellipse width="10" height="11" name="Path"/>
+                    <Fill name="Fill"><SolidColor colorValue="FF0E1A14" name="C"/></Fill>
+                </Shape>
+                <Shape name="White">
+                    <Ellipse width="22" height="22" name="Path"/>
+                    <Fill name="Fill"><SolidColor colorValue="FFFFFFFF" name="C"/></Fill>
+                </Shape>
+            </Node>
+            <Node x="16" y="19" name="Eye Bottom" id="1:12">
+                <Shape x="3" name="Pupil">
+                    <Ellipse width="10" height="11" name="Path"/>
+                    <Fill name="Fill"><SolidColor colorValue="FF0E1A14" name="C"/></Fill>
+                </Shape>
+                <Shape name="White">
+                    <Ellipse width="22" height="22" name="Path"/>
+                    <Fill name="Fill"><SolidColor colorValue="FFFFFFFF" name="C"/></Fill>
+                </Shape>
+            </Node>
+            <Shape x="40" y="-8" name="Nostril Top">
+                <Ellipse width="5" height="5" name="Path"/>
+                <Fill name="Fill"><SolidColor colorValue="FF1F6B47" name="C"/></Fill>
+            </Shape>
+            <Shape x="40" y="8" name="Nostril Bottom">
+                <Ellipse width="5" height="5" name="Path"/>
+                <Fill name="Fill"><SolidColor colorValue="FF1F6B47" name="C"/></Fill>
+            </Shape>
+            <Shape x="-10" y="-16" name="Highlight">
+                <Ellipse width="44" height="22" name="Path"/>
+                <Fill name="Fill"><SolidColor colorValue="40FFFFFF" name="C"/></Fill>
+            </Shape>
+            <Shape name="Skull">
+                <Ellipse width="100" height="88" name="Path"/>
+                <Fill name="Fill">
+                    <LinearGradient startX="0" startY="-44" endX="0" endY="44" name="Shade">
+                        <GradientStop colorValue="FF6EE0A2" position="0"/>
+                        <GradientStop colorValue="FF34B275" position="1"/>
+                    </LinearGradient>
+                </Fill>
+            </Shape>
+        </Node>
+
+        <!-- 3 second loop with a quick blink near the end -->
+        <LinearAnimation loopValue="loop" duration="180" name="Idle" id="1:80">
+            <KeyedObject objectId="1:11">
+                <KeyedProperty property="scaleY">
+                    <KeyFrameDouble value="1" frame="0" interpolationType="hold"/>
+                    <KeyFrameDouble value="1" frame="160" interpolationType="linear"/>
+                    <KeyFrameDouble value="0.1" frame="166" interpolationType="linear"/>
+                    <KeyFrameDouble value="1" frame="172" interpolationType="hold"/>
+                </KeyedProperty>
+            </KeyedObject>
+            <KeyedObject objectId="1:12">
+                <KeyedProperty property="scaleY">
+                    <KeyFrameDouble value="1" frame="0" interpolationType="hold"/>
+                    <KeyFrameDouble value="1" frame="160" interpolationType="linear"/>
+                    <KeyFrameDouble value="0.1" frame="166" interpolationType="linear"/>
+                    <KeyFrameDouble value="1" frame="172" interpolationType="hold"/>
+                </KeyedProperty>
+            </KeyedObject>
+        </LinearAnimation>
+
+        <StateMachine name="Head Machine" id="1:90">
+            <StateMachineLayer name="Idle" id="1:91">
+                <AnyState x="300" y="-120"/>
+                <ExitState x="500" y="-120"/>
+                <EntryState x="0" y="0"><StateTransition stateToId="1:92"/></EntryState>
+                <AnimationState x="160" y="0" animationId="1:80" id="1:92"/>
+            </StateMachineLayer>
+        </StateMachine>
+    </Artboard>
+
+    <!-- ===================== BODY ===================== -->
+    <!-- One body segment. The game draws it once per segment and shrinks
+         segments toward the tail. -->
+    <Artboard isComponent="true" defaultStateMachineId="1:190" clip="false" width="100" height="100"
+              styleId="1:102" x="160" y="0" name="Body" id="1:101">
+        <LayoutComponentStyle name="Body Style" id="1:102"/>
+
+        <Node x="50" y="50" name="Segment" id="1:110">
+            <Shape x="-12" y="-16" name="Highlight">
+                <Ellipse width="40" height="22" name="Path"/>
+                <Fill name="Fill"><SolidColor colorValue="38FFFFFF" name="C"/></Fill>
+            </Shape>
+            <Shape name="Scale">
+                <Ellipse width="92" height="92" name="Path"/>
+                <Fill name="Fill">
+                    <LinearGradient startX="0" startY="-46" endX="0" endY="46" name="Shade">
+                        <GradientStop colorValue="FF5BD394" position="0"/>
+                        <GradientStop colorValue="FF2E9E66" position="1"/>
+                    </LinearGradient>
+                </Fill>
+            </Shape>
+        </Node>
+
+        <LinearAnimation loopValue="loop" duration="60" name="Idle" id="1:180"/>
+
+        <StateMachine name="Body Machine" id="1:190">
+            <StateMachineLayer name="Idle" id="1:191">
+                <AnyState x="300" y="-120"/>
+                <ExitState x="500" y="-120"/>
+                <EntryState x="0" y="0"><StateTransition stateToId="1:192"/></EntryState>
+                <AnimationState x="160" y="0" animationId="1:180" id="1:192"/>
+            </StateMachineLayer>
+        </StateMachine>
+    </Artboard>
+
+    <!-- ===================== FOOD ===================== -->
+    <Artboard isComponent="true" defaultStateMachineId="1:290" clip="false" width="100" height="100"
+              styleId="1:202" x="320" y="0" name="Food" id="1:201">
+        <LayoutComponentStyle name="Food Style" id="1:202"/>
+
+        <Node x="50" y="54" name="Bob" id="1:210">
+            <Node x="2" y="-34" name="Leaf Pivot" id="1:211">
+                <Shape x="12" y="-4" rotation="-0.5" name="Leaf">
+                    <Ellipse width="28" height="13" name="Path"/>
+                    <Fill name="Fill"><SolidColor colorValue="FF4CC38A" name="C"/></Fill>
+                </Shape>
+                <Shape x="0" y="-2" name="Stem">
+                    <Rectangle width="5" height="14" cornerRadiusTL="2.5" cornerRadiusTR="2.5"
+                               cornerRadiusBL="2.5" cornerRadiusBR="2.5" name="Path"/>
+                    <Fill name="Fill"><SolidColor colorValue="FF7A4B2A" name="C"/></Fill>
+                </Shape>
+            </Node>
+            <Shape x="-14" y="-14" name="Shine">
+                <Ellipse width="18" height="12" rotation="-0.6" name="Path"/>
+                <Fill name="Fill"><SolidColor colorValue="99FFFFFF" name="C"/></Fill>
+            </Shape>
+            <Shape name="Berry">
+                <Ellipse width="72" height="70" name="Path"/>
+                <Fill name="Fill">
+                    <LinearGradient startX="-20" startY="-35" endX="20" endY="35" name="Shade">
+                        <GradientStop colorValue="FFFF7A86" position="0"/>
+                        <GradientStop colorValue="FFE23B57" position="1"/>
+                    </LinearGradient>
+                </Fill>
+            </Shape>
+        </Node>
+
+        <!-- gentle breathing pulse and a leaf sway -->
+        <LinearAnimation loopValue="pingPong" duration="48" name="Idle" id="1:280">
+            <KeyedObject objectId="1:210">
+                <KeyedProperty property="scaleX">
+                    <KeyFrameDouble value="0.94" frame="0" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/>
+                    </KeyFrameDouble>
+                    <KeyFrameDouble value="1.06" frame="48" interpolationType="linear"/>
+                </KeyedProperty>
+                <KeyedProperty property="scaleY">
+                    <KeyFrameDouble value="1.04" frame="0" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/>
+                    </KeyFrameDouble>
+                    <KeyFrameDouble value="0.96" frame="48" interpolationType="linear"/>
+                </KeyedProperty>
+            </KeyedObject>
+            <KeyedObject objectId="1:211">
+                <KeyedProperty property="rotation">
+                    <KeyFrameDouble value="-0.18" frame="0" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/>
+                    </KeyFrameDouble>
+                    <KeyFrameDouble value="0.18" frame="48" interpolationType="linear"/>
+                </KeyedProperty>
+            </KeyedObject>
+        </LinearAnimation>
+
+        <StateMachine name="Food Machine" id="1:290">
+            <StateMachineLayer name="Idle" id="1:291">
+                <AnyState x="300" y="-120"/>
+                <ExitState x="500" y="-120"/>
+                <EntryState x="0" y="0"><StateTransition stateToId="1:292"/></EntryState>
+                <AnimationState x="160" y="0" animationId="1:280" id="1:292"/>
+            </StateMachineLayer>
+        </StateMachine>
+    </Artboard>
+
+    <ComponentAsset artboardId="1:1" name="Head"/>
+    <ComponentAsset artboardId="1:101" name="Body"/>
+    <ComponentAsset artboardId="1:201" name="Food"/>
+</Rive>

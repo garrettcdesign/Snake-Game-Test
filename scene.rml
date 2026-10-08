@@ -1,22 +1,314 @@
 <Rive version="1" kind="fragment">
-    <Artboard defaultStateMachineId="0:7" styleId="0:5" width="500" height="500" name="Artboard" id="0:2">
-        <LayoutComponentStyle name="Artboard Style" id="0:5"/>
+    <!--
+        GAME SCREEN
+        ===========
+        * The playfield is a Luau script (scripts/game.luau). It runs the game
+          and draws the Head / Body / Food artboards from art/snake-art.rml.
+        * The HUD and the start / game-over cards are ordinary markup, driven
+          by the Game view model the script writes to.
+        In RML the FIRST sibling draws on TOP, so overlays come first.
+    -->
+    <Artboard defaultStateMachineId="0:7" viewModelId="0:40" viewModelInstanceId="0:45"
+              clip="true" width="720" height="800" styleId="0:5" x="0" y="200" name="Game" id="0:2">
+        <LayoutComponentStyle flexDirectionValue="column" name="Game Style" id="0:5"/>
 
-        <Fill name="Background">
-            <SolidColor colorValue="FF282828" name="Color"/>
-        </Fill>
+        <!-- ========== START CARD (shown before the first move) ========== -->
+        <Node x="360" y="440" name="Start Overlay" id="0:100">
+            <Text y="58" originX="0.5" originY="0.5" sizingValue="autoWidth" name="Start Prompt" id="0:105">
+                <TextStylePaint fontSize="16" fontAssetId="0:90" familyName="Inter" styleName="SemiBold"
+                                letterSpacing="1" name="Prompt Style" id="0:106">
+                    <Fill name="Fill"><SolidColor colorValue="FFF5D76E" name="C"/></Fill>
+                    <TextStyleAxis tag="2003265652" axisValue="600" name="Weight"/>
+                </TextStylePaint>
+                <TextValueRun styleId="0:106" text="PRESS ANY DIRECTION TO START" name="Run"/>
+            </Text>
+            <Text y="14" originX="0.5" originY="0.5" sizingValue="autoWidth" name="Start Help" id="0:103">
+                <TextStylePaint fontSize="18" fontAssetId="0:90" familyName="Inter" styleName="Medium"
+                                name="Help Style" id="0:104">
+                    <Fill name="Fill"><SolidColor colorValue="FF9AA9B8" name="C"/></Fill>
+                    <TextStyleAxis tag="2003265652" axisValue="500" name="Weight"/>
+                </TextStylePaint>
+                <TextValueRun styleId="0:104" text="Arrow keys or WASD to steer" name="Run"/>
+            </Text>
+            <Text y="-42" originX="0.5" originY="0.5" sizingValue="autoWidth" name="Start Title" id="0:101">
+                <TextStylePaint fontSize="64" fontAssetId="0:90" familyName="Inter" styleName="Black"
+                                letterSpacing="4" name="Title Style" id="0:102">
+                    <Fill name="Fill"><SolidColor colorValue="FF5BD394" name="C"/></Fill>
+                    <TextStyleAxis tag="2003265652" axisValue="900" name="Weight"/>
+                </TextStylePaint>
+                <TextValueRun styleId="0:102" text="SNAKE" name="Run"/>
+            </Text>
+            <Shape name="Start Card">
+                <Rectangle width="480" height="230" cornerRadiusTL="28" cornerRadiusTR="28"
+                           cornerRadiusBL="28" cornerRadiusBR="28" name="Path"/>
+                <Stroke thickness="2" name="Edge"><SolidColor colorValue="FF2B3B4A" name="C"/></Stroke>
+                <Fill name="Fill"><SolidColor colorValue="F2141C24" name="C"/></Fill>
+            </Shape>
+            <Shape name="Start Dim">
+                <Rectangle width="720" height="720" name="Path"/>
+                <Fill name="Fill"><SolidColor colorValue="8C0A0F14" name="C"/></Fill>
+            </Shape>
+        </Node>
 
-        <StateMachine name="State Machine 1" id="0:7">
-            <StateMachineLayer name="Layer 1" id="0:8">
-                <AnyState x="200" y="-120"/>
-                <ExitState x="400" y="-120"/>
-                <EntryState>
-                    <StateTransition stateToId="0:12"/>
-                </EntryState>
-                <AnimationState x="200" animationId="0:6" id="0:12"/>
+        <!-- ========== GAME OVER CARD ========== -->
+        <Node x="360" y="440" opacity="0" name="Game Over Overlay" id="0:120">
+            <Text y="62" originX="0.5" originY="0.5" sizingValue="autoWidth" name="Over Prompt" id="0:125">
+                <TextStylePaint fontSize="16" fontAssetId="0:90" familyName="Inter" styleName="SemiBold"
+                                letterSpacing="1" name="Prompt Style" id="0:126">
+                    <Fill name="Fill"><SolidColor colorValue="FFF5D76E" name="C"/></Fill>
+                    <TextStyleAxis tag="2003265652" axisValue="600" name="Weight"/>
+                </TextStylePaint>
+                <TextValueRun styleId="0:126" text="SPACE OR ENTER TO PLAY AGAIN" name="Run"/>
+            </Text>
+            <Text y="8" originX="0.5" originY="0.5" sizingValue="autoWidth" name="Over Score" id="0:123">
+                <TextStylePaint fontSize="22" fontAssetId="0:90" familyName="Inter" styleName="Medium"
+                                name="Label Style" id="0:124">
+                    <Fill name="Fill"><SolidColor colorValue="FF9AA9B8" name="C"/></Fill>
+                    <TextStyleAxis tag="2003265652" axisValue="500" name="Weight"/>
+                </TextStylePaint>
+                <TextStylePaint fontSize="22" fontAssetId="0:90" familyName="Inter" styleName="Bold"
+                                name="Value Style" id="0:127">
+                    <Fill name="Fill"><SolidColor colorValue="FFFFFFFF" name="C"/></Fill>
+                    <TextStyleAxis tag="2003265652" axisValue="700" name="Weight"/>
+                </TextStylePaint>
+                <TextValueRun styleId="0:124" text="Score  " name="Label"/>
+                <TextValueRun styleId="0:127" text="0" name="Value">
+                    <DataBindContext sourcePathIds="0:40-0:41" propertyKey="268" converterId="0:60"/>
+                </TextValueRun>
+            </Text>
+            <Text y="-48" originX="0.5" originY="0.5" sizingValue="autoWidth" name="Over Title" id="0:121">
+                <TextStylePaint fontSize="52" fontAssetId="0:90" familyName="Inter" styleName="Black"
+                                letterSpacing="3" name="Title Style" id="0:122">
+                    <Fill name="Fill"><SolidColor colorValue="FFFF6B7D" name="C"/></Fill>
+                    <TextStyleAxis tag="2003265652" axisValue="900" name="Weight"/>
+                </TextStylePaint>
+                <TextValueRun styleId="0:122" text="GAME OVER" name="Run"/>
+            </Text>
+            <Shape name="Over Card">
+                <Rectangle width="480" height="230" cornerRadiusTL="28" cornerRadiusTR="28"
+                           cornerRadiusBL="28" cornerRadiusBR="28" name="Path"/>
+                <Stroke thickness="2" name="Edge"><SolidColor colorValue="FF4A2B33" name="C"/></Stroke>
+                <Fill name="Fill"><SolidColor colorValue="F2141C24" name="C"/></Fill>
+            </Shape>
+            <Shape name="Over Dim">
+                <Rectangle width="720" height="720" name="Path"/>
+                <Fill name="Fill"><SolidColor colorValue="A60A0F14" name="C"/></Fill>
+            </Shape>
+        </Node>
+
+        <!-- ========== HUD TEXT (sits on the HUD bar below) ========== -->
+        <Text x="32" y="40" originY="0.5" sizingValue="autoWidth" name="Score Readout" id="0:140">
+            <TextStylePaint fontSize="13" fontAssetId="0:90" familyName="Inter" styleName="SemiBold"
+                            letterSpacing="2" name="Label Style" id="0:141">
+                <Fill name="Fill"><SolidColor colorValue="FF7C8B99" name="C"/></Fill>
+                <TextStyleAxis tag="2003265652" axisValue="600" name="Weight"/>
+            </TextStylePaint>
+            <TextStylePaint fontSize="30" fontAssetId="0:90" familyName="Inter" styleName="ExtraBold"
+                            name="Value Style" id="0:142">
+                <Fill name="Fill"><SolidColor colorValue="FFFFFFFF" name="C"/></Fill>
+                <TextStyleAxis tag="2003265652" axisValue="800" name="Weight"/>
+            </TextStylePaint>
+            <TextValueRun styleId="0:141" text="SCORE  " name="Label"/>
+            <TextValueRun styleId="0:142" text="0" name="Value">
+                <DataBindContext sourcePathIds="0:40-0:41" propertyKey="268" converterId="0:60"/>
+            </TextValueRun>
+        </Text>
+
+        <Text x="360" y="40" originX="0.5" originY="0.5" sizingValue="autoWidth" name="Logo" id="0:145">
+            <TextStylePaint fontSize="20" fontAssetId="0:90" familyName="Inter" styleName="Black"
+                            letterSpacing="6" name="Logo Style" id="0:146">
+                <Fill name="Fill"><SolidColor colorValue="FF5BD394" name="C"/></Fill>
+                <TextStyleAxis tag="2003265652" axisValue="900" name="Weight"/>
+            </TextStylePaint>
+            <TextValueRun styleId="0:146" text="SNAKE" name="Run"/>
+        </Text>
+
+        <Text x="688" y="40" originX="1" originY="0.5" sizingValue="autoWidth" name="Best Readout" id="0:150">
+            <TextStylePaint fontSize="13" fontAssetId="0:90" familyName="Inter" styleName="SemiBold"
+                            letterSpacing="2" name="Label Style" id="0:151">
+                <Fill name="Fill"><SolidColor colorValue="FF7C8B99" name="C"/></Fill>
+                <TextStyleAxis tag="2003265652" axisValue="600" name="Weight"/>
+            </TextStylePaint>
+            <TextStylePaint fontSize="30" fontAssetId="0:90" familyName="Inter" styleName="ExtraBold"
+                            name="Value Style" id="0:152">
+                <Fill name="Fill"><SolidColor colorValue="FFF5D76E" name="C"/></Fill>
+                <TextStyleAxis tag="2003265652" axisValue="800" name="Weight"/>
+            </TextStylePaint>
+            <TextValueRun styleId="0:151" text="BEST  " name="Label"/>
+            <TextValueRun styleId="0:152" text="0" name="Value">
+                <DataBindContext sourcePathIds="0:40-0:42" propertyKey="268" converterId="0:60"/>
+            </TextValueRun>
+        </Text>
+
+        <!-- ========== LAYOUT: HUD bar on top, playfield fills the rest ========== -->
+        <LayoutComponent width="720" height="80" styleId="0:11" name="HUD" id="0:10">
+            <LayoutComponentStyle layoutWidthScaleType="fill" layoutHeightScaleType="fixed"
+                                  name="HUD Style" id="0:11"/>
+            <Fill name="Fill"><SolidColor colorValue="FF0B1015" name="C"/></Fill>
+        </LayoutComponent>
+
+        <LayoutComponent width="720" height="720" styleId="0:13" name="Playfield" id="0:12">
+            <LayoutComponentStyle layoutWidthScaleType="fill" layoutHeightScaleType="fill"
+                                  widthUnitsValue="auto" heightUnitsValue="auto"
+                                  name="Playfield Style" id="0:13"/>
+            <ScriptedLayout scriptAssetId="0:80" name="Snake Game" id="0:14">
+                <!-- keyboard only reaches a script with a direct FocusData child -->
+                <FocusData id="0:15"/>
+                <!-- the swappable art (art/snake-art.rml) -->
+                <ScriptInputArtboard artboardId="1:1" name="head" id="0:16"/>
+                <ScriptInputArtboard artboardId="1:101" name="body" id="0:17"/>
+                <ScriptInputArtboard artboardId="1:201" name="food" id="0:18"/>
+                <!-- tuning: grid size and speed (seconds per step) -->
+                <ScriptInputNumber propertyValue="20" name="gridSize" id="0:19"/>
+                <ScriptInputNumber propertyValue="0.15" name="startStepTime" id="0:20"/>
+                <ScriptInputNumber propertyValue="0.06" name="fastestStepTime" id="0:21"/>
+                <ScriptInputNumber propertyValue="0.005" name="speedUpPerFood" id="0:22"/>
+            </ScriptedLayout>
+        </LayoutComponent>
+
+        <Fill name="Background"><SolidColor colorValue="FF0E141A" name="C"/></Fill>
+
+        <!-- ========== ANIMATIONS: held poses the transitions blend between ========== -->
+        <LinearAnimation duration="1" name="Start Shown" id="0:30">
+            <KeyedObject objectId="0:100">
+                <KeyedProperty property="opacity"><KeyFrameDouble value="1" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleX"><KeyFrameDouble value="1" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleY"><KeyFrameDouble value="1" interpolationType="linear"/></KeyedProperty>
+            </KeyedObject>
+        </LinearAnimation>
+        <LinearAnimation duration="1" name="Start Hidden" id="0:31">
+            <KeyedObject objectId="0:100">
+                <KeyedProperty property="opacity"><KeyFrameDouble value="0" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleX"><KeyFrameDouble value="1.08" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleY"><KeyFrameDouble value="1.08" interpolationType="linear"/></KeyedProperty>
+            </KeyedObject>
+        </LinearAnimation>
+        <LinearAnimation duration="1" name="Over Shown" id="0:32">
+            <KeyedObject objectId="0:120">
+                <KeyedProperty property="opacity"><KeyFrameDouble value="1" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleX"><KeyFrameDouble value="1" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleY"><KeyFrameDouble value="1" interpolationType="linear"/></KeyedProperty>
+            </KeyedObject>
+        </LinearAnimation>
+        <LinearAnimation duration="1" name="Over Hidden" id="0:33">
+            <KeyedObject objectId="0:120">
+                <KeyedProperty property="opacity"><KeyFrameDouble value="0" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleX"><KeyFrameDouble value="0.85" interpolationType="linear"/></KeyedProperty>
+                <KeyedProperty property="scaleY"><KeyFrameDouble value="0.85" interpolationType="linear"/></KeyedProperty>
+            </KeyedObject>
+        </LinearAnimation>
+        <!-- the "press a key" prompts breathe -->
+        <LinearAnimation loopValue="pingPong" duration="45" name="Prompt Pulse" id="0:34">
+            <KeyedObject objectId="0:105">
+                <KeyedProperty property="opacity">
+                    <KeyFrameDouble value="1" frame="0" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/>
+                    </KeyFrameDouble>
+                    <KeyFrameDouble value="0.35" frame="45" interpolationType="linear"/>
+                </KeyedProperty>
+            </KeyedObject>
+            <KeyedObject objectId="0:125">
+                <KeyedProperty property="opacity">
+                    <KeyFrameDouble value="1" frame="0" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/>
+                    </KeyFrameDouble>
+                    <KeyFrameDouble value="0.35" frame="45" interpolationType="linear"/>
+                </KeyedProperty>
+            </KeyedObject>
+        </LinearAnimation>
+
+        <StateMachine name="Game Machine" id="0:7">
+            <!-- start card: visible until the script clears showStart -->
+            <StateMachineLayer name="Start Card" id="0:8">
+                <AnyState x="500" y="-120"/>
+                <ExitState x="700" y="-120"/>
+                <EntryState x="0" y="0"><StateTransition stateToId="0:70"/></EntryState>
+                <AnimationState x="160" y="0" animationId="0:30" stateName="Shown" id="0:70">
+                    <StateTransition stateToId="0:71" duration="220" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.4" y1="0" x2="0.2" y2="1"/>
+                        <TransitionViewModelCondition>
+                            <TransitionPropertyViewModelComparator>
+                                <BindablePropertyBoolean>
+                                    <DataBindContext sourcePathIds="0:40-0:43" propertyKey="634"/>
+                                </BindablePropertyBoolean>
+                            </TransitionPropertyViewModelComparator>
+                            <TransitionValueBooleanComparator value="false"/>
+                        </TransitionViewModelCondition>
+                    </StateTransition>
+                </AnimationState>
+                <AnimationState x="360" y="100" animationId="0:31" stateName="Hidden" id="0:71">
+                    <StateTransition stateToId="0:70" duration="300" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.2" y1="0" x2="0.2" y2="1"/>
+                        <TransitionViewModelCondition>
+                            <TransitionPropertyViewModelComparator>
+                                <BindablePropertyBoolean>
+                                    <DataBindContext sourcePathIds="0:40-0:43" propertyKey="634"/>
+                                </BindablePropertyBoolean>
+                            </TransitionPropertyViewModelComparator>
+                            <TransitionValueBooleanComparator value="true"/>
+                        </TransitionViewModelCondition>
+                    </StateTransition>
+                </AnimationState>
+            </StateMachineLayer>
+
+            <!-- game-over card: springs in when the script sets showGameOver -->
+            <StateMachineLayer name="Game Over Card" id="0:9">
+                <AnyState x="500" y="-120"/>
+                <ExitState x="700" y="-120"/>
+                <EntryState x="0" y="0"><StateTransition stateToId="0:72"/></EntryState>
+                <AnimationState x="160" y="0" animationId="0:33" stateName="Hidden" id="0:72">
+                    <StateTransition stateToId="0:73" duration="450" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.3" y1="0" x2="0.2" y2="1.35"/>
+                        <TransitionViewModelCondition>
+                            <TransitionPropertyViewModelComparator>
+                                <BindablePropertyBoolean>
+                                    <DataBindContext sourcePathIds="0:40-0:44" propertyKey="634"/>
+                                </BindablePropertyBoolean>
+                            </TransitionPropertyViewModelComparator>
+                            <TransitionValueBooleanComparator value="true"/>
+                        </TransitionViewModelCondition>
+                    </StateTransition>
+                </AnimationState>
+                <AnimationState x="360" y="100" animationId="0:32" stateName="Shown" id="0:73">
+                    <StateTransition stateToId="0:72" duration="200" interpolationType="cubic">
+                        <CubicEaseInterpolator x1="0.4" y1="0" x2="1" y2="1"/>
+                        <TransitionViewModelCondition>
+                            <TransitionPropertyViewModelComparator>
+                                <BindablePropertyBoolean>
+                                    <DataBindContext sourcePathIds="0:40-0:44" propertyKey="634"/>
+                                </BindablePropertyBoolean>
+                            </TransitionPropertyViewModelComparator>
+                            <TransitionValueBooleanComparator value="false"/>
+                        </TransitionViewModelCondition>
+                    </StateTransition>
+                </AnimationState>
+            </StateMachineLayer>
+
+            <StateMachineLayer name="Prompt Pulse" id="0:6">
+                <AnyState x="500" y="-120"/>
+                <ExitState x="700" y="-120"/>
+                <EntryState x="0" y="0"><StateTransition stateToId="0:74"/></EntryState>
+                <AnimationState x="160" y="0" animationId="0:34" id="0:74"/>
             </StateMachineLayer>
         </StateMachine>
-
-        <LinearAnimation duration="60" name="Animation 1" id="0:6"/>
     </Artboard>
+
+    <!-- What the script writes and the HUD / cards read. -->
+    <ViewModel defaultInstanceId="0:45" name="Game" id="0:40">
+        <ViewModelPropertyNumber name="score" id="0:41"/>
+        <ViewModelPropertyNumber name="best" id="0:42"/>
+        <ViewModelPropertyBoolean name="showStart" id="0:43"/>
+        <ViewModelPropertyBoolean name="showGameOver" id="0:44"/>
+        <ViewModelInstance exports="true" name="Default" id="0:45">
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:41"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:42"/>
+            <ViewModelInstanceBoolean propertyValue="true" viewModelPropertyId="0:43"/>
+            <ViewModelInstanceBoolean propertyValue="false" viewModelPropertyId="0:44"/>
+        </ViewModelInstance>
+    </ViewModel>
+
+    <DataConverterToString decimals="0" round="true" name="Whole Number" id="0:60"/>
+
+    <ScriptAsset file="scripts/game.luau" name="game" id="0:80"/>
+    <FontAsset file="assets/fonts/Inter.ttf" name="Inter" id="0:90"/>
 </Rive>
