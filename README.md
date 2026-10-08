@@ -21,9 +21,22 @@ The snake speeds up a little every time it eats.
 |---|---|
 | `scene.rml` | The game screen: HUD, start card, game-over card, and the view model the game writes to |
 | `art/snake-art.rml` | **The swappable art**: the `Head`, `Body` and `Food` artboards |
-| `scripts/game.luau` | Game logic and the playfield renderer |
-| `assets/fonts/Inter.ttf` | UI font (SIL Open Font License) |
+| `game.luau` | Game logic and the playfield renderer |
+| `Inter.ttf` | UI font (SIL Open Font License) |
 | `rive.yaml` | Project config (`main: Game` is the artboard that opens) |
+
+## Syncing with the Rive editor
+
+The project is linked to a Rive file (see `push:` in `rive.yaml`).
+
+```bash
+rive push   # send local changes to the Rive file
+rive pull   # bring editor changes down (overwrites local files)
+```
+
+Commit before pulling so the changes show up as a reviewable diff. A pull
+lays files out the way the Rive file holds them, which is why the script and
+font live in the project root.
 
 ## Swapping art
 
@@ -46,12 +59,12 @@ Change the shapes inside the `Head`, `Body` or `Food` artboard in
 
 ### Option 2: use your own image
 
-1. Put the image in `assets/images/`, for example `assets/images/head.png`.
+1. Put the image in the project folder, for example `head.png`.
 2. Add an image asset next to the `ComponentAsset` lines at the bottom of
    `art/snake-art.rml`:
 
    ```xml
-   <ImageAsset file="assets/images/head.png" name="head" id="1:500"/>
+   <ImageAsset file="head.png" name="head" id="1:500"/>
    ```
 
 3. Replace the contents of the artboard (for example, the `Face` node in
